@@ -7,7 +7,6 @@
 # from coordonate import coordonate
 # import numpy as np
 # # import easyocr
-python==3.9
 flask
 Pillow
 numpy
