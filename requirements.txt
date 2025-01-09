@@ -1,0 +1,13 @@
+# # from flask import Flask, render_template, request
+# import os
+# import time
+# from PIL import Image
+# from io import BytesIO
+# import re
+# from coordonate import coordonate
+# import numpy as np
+# # import easyocr
+flask
+Pillow
+numpy
+easyocr
