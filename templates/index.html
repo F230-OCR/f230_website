@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesare Formular</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Încărcare formular pentru procesare</h1>
+
+    <!-- Formularul de încărcare a fișierului -->
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Încarcă formular</button>
+    </form>
+
+    {% if info %}
+    <div class="results">
+        <h2>Informațiile extrase din formular</h2>
+        <p><strong>Nume:</strong> {{ info.nume }}</p>
+        <p><strong>Prenume:</strong> {{ info.prenume }}</p>
+        <p><strong>Inițiala tatălui:</strong> {{ info.initiala_tatalui }}</p>
+        <p><strong>CNP:</strong> {{ info.cnp }}</p>
+        <p><strong>Adresă:</strong> {{ info.adresa }}</p>
+        <p><strong>Email:</strong> {{ info.email }}</p>
+        <p><strong>Telefon:</strong> {{ info.telefon }}</p>
+        <p><strong>2 ani:</strong> {{ info.doiani }}</p>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
