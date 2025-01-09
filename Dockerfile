@@ -1,7 +1,7 @@
 #what should i do with this file?
 #this file is used to create a docker image
 #write the code
-FROM python:3.7
+FROM python:3.9-alpine
 COPY . /app 
 WORKDIR /app
 RUN pip install -r requirements.txt
