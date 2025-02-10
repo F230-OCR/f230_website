@@ -44,7 +44,7 @@ def capitalize_words(text):
     return ' '.join([word.capitalize() for word in text.split()])
 
 # Configurare EasyOCR
-reader = easyocr.Reader(['ro'], gpu=False)
+reader = easyocr.Reader(['en'])
 
 # Funcție pentru procesarea unei zone din imagine
 def proceseaza_zona(coord, idx, image):
@@ -86,21 +86,6 @@ def proceseaza_fisier(image):
     
     for idx, coord in enumerate(coordonate):
         try:
-            # if idx is not 15 - nu e zona de 2 ani
-            # if idx != 15:
-            #     text = proceseaza_zona(coord, idx, image)
-            # else:
-            #     # Calculăm media de culoare în zona decupată
-            #     zona_decupata = image.crop(coord)
-            #     # salveza poza decupata
-            #     zona_decupata.save('static/uploads/2ani.jpg')
-            #     zona_np = np.array(zona_decupata)
-            #     media_culoare = np.mean(zona_np)
-            #     # Verificăm dacă media de culoare este diferită de alb (alb este considerat 255 pentru fiecare canal RGB)
-            #     text = "DA" if media_culoare < 200 else "NU"
-            #     info['doiani'] = text
-            #     print(f"Text citit din zona {idx + 1}: {text}")
-            #     continue
             text = proceseaza_zona(coord, idx, image)
             if idx == 0:  # Prenume
                 if text and text[0] == 'l' and text[0] != 'I':  # Corectare 'l' în 'I'
