@@ -239,7 +239,7 @@ def proceseaza_fisier(image):
             print(f"Eroare la procesarea zonei {idx + 1}: {e}")
 
     # Construim adresa conform formatului dorit
-    info['adresa'] = f"Str. {strada} NR. {nr} LOC. {localitate} JUD. {judet}"
+    info['adresa'] = f"Str. {strada} NR. {numar} LOC. {localitate} JUD. {judet}"
     
     if bloc:
         info['adresa'] += f" Bl. {bloc}"
