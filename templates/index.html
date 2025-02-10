@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Procesare Formular</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -21,13 +22,16 @@
     <div class="results">
         <h2>Informațiile extrase din formular</h2>
         <p><strong>Nume:</strong> {{ info.nume }}</p>
-        <p><strong>Prenume:</strong> {{ info.prenume }}</p>
         <p><strong>Inițiala tatălui:</strong> {{ info.initiala_tatalui }}</p>
+        <p><strong>Prenume:</strong> {{ info.prenume }}</p>
         <p><strong>CNP:</strong> {{ info.cnp }}</p>
         <p><strong>Adresă:</strong> {{ info.adresa }}</p>
         <p><strong>Email:</strong> {{ info.email }}</p>
         <p><strong>Telefon:</strong> {{ info.telefon }}</p>
         <p><strong>2 ani:</strong> {{ info.doiani }}</p>
+        <p><strong>Anaf 1:</strong> {{ info.anaf1 }}</p>
+        <p><strong>Anaf 2:</strong> {{ info.anaf2 }}</p> 
+        <p><strong>Anaf 3:</strong> {{ info.anaf3 }}</p>
     </div>
     {% endif %}
 </div>

@@ -9,6 +9,44 @@ import numpy as np
 import easyocr
 
 app = Flask(__name__)
+def cautare_anaf(localitate):
+    lower_localitate = localitate.lower()
+    
+    from anaf.alba import alba
+    from anaf.bucuresti import bucuresti
+    from anaf.cluj import cluj
+    from anaf.craiova import craiova
+    from anaf.galati import galati
+    from anaf.iasi import iasi
+    from anaf.ploiesti import ploiesti
+    from anaf.timisoara import timisoara
+
+    anaf_data = [alba, bucuresti, cluj, craiova, galati, iasi, ploiesti, timisoara]
+
+    for data in anaf_data:
+        for directie, judete in data.items():
+            #if isinstance(directie, dict):  # Verifică dacă directie este un dicționar
+                for judet, unitati in judete.items():
+                    if isinstance(unitati, dict):  # Verifică dacă unitati este un dicționar
+                        for unitate, localitati in unitati.items():
+                            if isinstance(localitati, list):  # Verifică dacă localitati este o listă
+                                for loc in localitati:
+                                    if loc.lower() == lower_localitate:
+                                        return unitate, judet, directie
+    return "Unknown", "UnKnown", "UNKNOWN"
+
+def replace_diacritics(text):
+    text = text.replace('ă', 'a')
+    text = text.replace('â', 'a')
+    text = text.replace('î', 'i')
+    text = text.replace('ș', 's')
+    text = text.replace('ț', 't')
+    text = text.replace('Ă', 'A')
+    text = text.replace('Â', 'A')
+    text = text.replace('Î', 'I')
+    text = text.replace('Ș', 'S')
+    text = text.replace('Ț', 'T')
+    return text  # Add return statement
 
 # Directorul unde sunt salvate fișierele încărcate
 UPLOAD_FOLDER = 'static/uploads'
@@ -72,7 +110,8 @@ def proceseaza_zona(coord, idx, image):
 def proceseaza_fisier(image):
     info = {
             'nume': '', 'initiala_tatalui': '', 'prenume': '', 'cnp': '', 'adresa': '', 'email': '', 'scara': '', 
-            'apartament': '', 'bloc': '', 'localitate': '', 'judet': '', 'cp': '', 'telefon': '', 'doiani': ''
+            'apartament': '', 'bloc': '', 'localitate': '', 'judet': '', 'cp': '', 'telefon': '', 'doiani': '',
+            'anaf1' : '', 'anaf2' : '', 'anaf3' : ''
             }
 
     # Definim variabilele pentru detaliile adresei
@@ -85,57 +124,117 @@ def proceseaza_fisier(image):
     etaj = ""
     
     for idx, coord in enumerate(coordonate):
+        text = proceseaza_zona(coord, idx, image)
+        text_initial = text
         try:
-            text = proceseaza_zona(coord, idx, image)
-            if idx == 0:  # Prenume
-                if text and text[0] == 'l' and text[0] != 'I':  # Corectare 'l' în 'I'
-                    text = 'I' + text[1:]
-                info['prenume'] = capitalize_words(filtru_nume(text))
-            elif idx == 1:  # Nume
-                if text and text[0] == 'l' and text[0] != 'I':  # Corectare 'l' în 'I'
-                    text = 'I' + text[1:]
-                info['nume'] = capitalize_words(filtru_nume(text))
-            elif idx == 2:  # Inițiala tatălui
-                info['initiala_tatalui'] = filtru_litere(text)
-            elif idx == 3:  # Strada
-                strada = capitalize_words(text)
-            elif idx == 4:  # Număr
-                nr = text.lstrip('0')
-            elif idx == 5:  # CNP
-                info['cnp'] = filtru_cifre(text)
-            elif idx == 6:  # Email
-                text.replace(" @", "@")  # Elimină spațiul din fața simbolului @
-                # before the word com we have to put a dot, but if there is a dot before com, we don't have to put another one
-                text = text.replace(' ', '.')  # Replace spaces with dots
-                text = text.replace('..', '.')  # Replace double dots with single dots
-                text = text.replace('com.', 'com')  # Replace com. with com
-                #define find
-                if text.find('.com') == -1:
-                    text = text.replace('com', '.com')  # Add . before com
-                info['email'] = text
-            elif idx == 7:  # Județ
-                judet = capitalize_words(text)
-            elif idx == 8:  # Localitate
-                text = text.replace('-', ' ')  # Înlocuiește cratimele cu spațiu
-                text = text.replace(',', ' ')  # Înlocuiește virgulele cu spațiu
-                localitate = capitalize_words(text)
-            elif idx == 9:  # Cod poștal
-                cp = filtru_cifre(text)
-            elif idx == 10:  # Bloc 
-                bloc = text.upper()
-            elif idx == 11:  # Scara
-                info['scara'] = text.upper()
-            elif idx == 12:  # etaj
-                etaj = text.upper()
-            elif idx == 13:  # Apartament
-                info['apartament'] = text
-            elif idx == 14: #telefon
-                info['telefon'] = text
+            if idx == 0:  # Prenume (zona 1)
+                text_filtrat = capitalize_words(filtru_nume(text_initial))
+                prenume = text_filtrat
+                #daca prima litera e L si ultima e 'a' atunci incepe cu I, nu cu L
+                if prenume[0] == 'L' and prenume[-1] == 'a':
+                    prenume = 'I'+ prenume[1:]
+                info['prenume'] = prenume
+            elif idx == 1:  # Nume (zona 2)
+                text_filtrat = capitalize_words(filtru_nume(text_initial))
+                nume = text_filtrat
+                info['nume'] = nume
+            elif idx == 2:  # Inițiala tatălui (zona 3)
+                text_filtrat = filtru_litere(text_initial)
+                initiala_tatalui = text_filtrat
+                info['initiala_tatalui'] = initiala_tatalui
+            elif idx == 3:  # Strada (zona 4)
+                text_filtrat = text_initial.capitalize()
+                strada = text_filtrat
+            elif idx == 4:  # Număr (zona 5)
+                text_filtrat = text_initial.lstrip('0')
+                numar = text_filtrat
+            elif idx == 5:  # CNP (zona 6)
+                text_filtrat = filtru_cifre(text_initial)
+                cnp_total = text_filtrat  # Inițializăm cnp_tota
+                info['cnp'] = cnp_total
+            elif idx == 6:  # Email (zona 7)
+                text_filtrat = text_initial.replace(' ', '.')  # Înlocuiește spațiile cu puncte
+                text_filtrat = text_filtrat.replace('..', '.')  # Înlocuiește punctele duble
+                text_filtrat = text_filtrat.replace('com.', 'com')  # Înlocuiește "com." cu "com"
+                if text_filtrat.find('.com') == -1:
+                    text_filtrat = text_filtrat.replace('com', '.com')  # Adaugă un punct înainte de "com"
+                email = text_filtrat  # Actualizează variabila email
+                info['email'] = email
+            elif idx == 7:  # Județ (zona 8)
+                text_filtrat = capitalize_words(text_initial)
+                text_filtrat = replace_diacritics(text_filtrat)
+                judet = text_filtrat
+                info['judet'] = judet
+                #memoreaza variabila judet ca sa pot sa o accesez si cand idx e 8
+            elif idx == 8:  # Localitate (zona 9)
+                text_initial = text_initial.replace('-', ' ')  # Înlocuiește cratimele cu spațiu
+                text_initial = text_initial.replace(',', ' ')  # Înlocuiește virgulele cu spațiu
+                text_filtrat = capitalize_words(text_initial)
+                text_filtrat = replace_diacritics(text_filtrat)
+                #strip text
+                text_filtrat = text_filtrat.strip()
+                localitate = text_filtrat
+                if localitate.lower() != "bucuresti":
+                    print("am intrat in if")
+                    folder_localitate_mic,folder_localitate_med, folder_localitate_mare = cautare_anaf(localitate) # Caută localitatea în baza de date ANAF
+                    if folder_localitate_mic == "Unknown":
+                        folder_localitate_mic = localitate
+                        folder_localitate = localitate
+                        #debug_afisare(idx, "Localitate", text_initial, text_filtrat)
+                        print(cautare_anaf(localitate))
+                        print(f"Localitatea din if {localitate} nu a fost găsită în baza de date ANAF")
+                    if folder_localitate_med == "UnKnown":
+                        folder_localitate_med = localitate
+                    if folder_localitate_mare == "UNKNOWN":
+                        folder_localitate_mare = localitate
+                elif localitate.lower() == "bucuresti":
+                    print(f"am intrat in else, cautam judetul {judet}")
+                    temp_judet= judet.lower()
+                    print (temp_judet)
+                    print (judet)
+                    folder_localitate_mic,folder_localitate_med, folder_localitate_mare = cautare_anaf(temp_judet)
+                    #debug_afisare(idx, "Localitate", text_initial, text_filtrat)
+                    print(cautare_anaf(temp_judet))
+                    print(f"Judetul {judet} nu a fost găsită în baza de date ANAF")
+                    if folder_localitate_mic == "Unknown":
+                        folder_localitate = localitate
+                    if folder_localitate_med == "UnKnown":
+                        folder_localitate_med = judet
+                    if folder_localitate_mare == "UNKNOWN":
+                        folder_localitate_mare = judet
+                info['anaf1'] = folder_localitate_mic
+                info['anaf2'] = folder_localitate_med
+                info['anaf3'] = folder_localitate_mare
+                info['localitate'] = localitate
+            elif idx == 9:  # Cod postal (zona 10)
+                text_filtrat = filtru_cifre(text_initial) if text_initial else ""
+                cp = text_filtrat
+                info['cp'] = cp
+            elif idx == 10:  # Bloc (zona 11)
+                text_filtrat = text_initial.upper() if text_initial else ""
+                bloc = text_filtrat
+                info['bloc'] = bloc
+            elif idx == 11:  # Scara (zona 12)
+                text_filtrat = text_initial.upper() if text_initial else ""
+                scara = text_filtrat
+                info['scara'] = scara
+            elif idx == 12:  # Etaj (zona 13)
+                text_filtrat = filtru_cifre(text_initial) if text_initial else ""
+                etaj = text_filtrat
+                info['etaj'] = etaj
+            elif idx == 13:  # Apartament (zona 14)
+                text_filtrat = text_initial
+                apartament = text_filtrat
+                info['apartament'] = apartament
+            elif idx == 14:  # Telefon (zona 15)
+                text_filtrat = filtru_cifre(text_initial)
+                phone = text_filtrat
+                info['telefon'] = phone
             elif idx == 15: #2 ani
-                if text!='':
-                    info['doiani'] = 'DA'
-                else:
-                    info['doiani'] = 'NU'
+                    if text_initial!='':
+                        info['doiani'] = 'DA'
+                    else:
+                        info['doiani'] = 'NU'
         except Exception as e:
             print(f"Eroare la procesarea zonei {idx + 1}: {e}")
 
